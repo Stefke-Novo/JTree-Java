@@ -4,13 +4,16 @@
  */
 package view;
 
-import classes.JTreeFileModel;
+import classes.CreateChildNodes;
+import classes.TreeFileNode;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  *
@@ -18,13 +21,15 @@ import javax.swing.JOptionPane;
  */
 public class FrmPrimer extends javax.swing.JFrame {
 
-    private String putanja;
+    private TreeFileNode root;
+    private DefaultTreeModel treeModel;
+    private TreeFileNode selectedNode;
     /**
      * Creates new form FrmPrimer
      */
     public FrmPrimer() {
         initComponents();
-        podesiDrvo();
+        pripremiPodatke();
     }
 
     /**
@@ -38,16 +43,16 @@ public class FrmPrimer extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTree1 = new javax.swing.JTree();
-        jTextField1 = new javax.swing.JTextField();
+        jTextFieldSelectedNode = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jTextFieldNewNode = new javax.swing.JTextField();
         jButtonCreate = new javax.swing.JButton();
         jButtonRename = new javax.swing.JButton();
         jButtonOpen = new javax.swing.JButton();
         jButtonDelete = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -59,7 +64,27 @@ public class FrmPrimer extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTree1);
 
-        jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jTextFieldSelectedNode.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jTextFieldSelectedNode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldSelectedNodeActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Trenutno oznacen fajl");
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Naziv novog fajla");
+
+        jTextFieldNewNode.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jTextFieldNewNode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldNewNodeActionPerformed(evt);
+            }
+        });
 
         jButtonCreate.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jButtonCreate.setText("Kreiraj");
@@ -93,26 +118,11 @@ public class FrmPrimer extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Trenutno oznacen fajl");
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Naziv novog fajla");
-
-        jTextField2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jComboBox1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "txt", "docx", "xlsx", "ppt" }));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel3.setText("Ekstenzije za novi fajl");
-
-        jComboBox1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "txt", "docx", "xlsx", "ppt" }));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -127,9 +137,9 @@ public class FrmPrimer extends javax.swing.JFrame {
                     .addComponent(jButtonRename, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButtonOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButtonDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1)
+                    .addComponent(jTextFieldSelectedNode)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextField2)
+                    .addComponent(jTextFieldNewNode)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -148,14 +158,14 @@ public class FrmPrimer extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jTextFieldSelectedNode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldNewNode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(jButtonCreate)
@@ -172,82 +182,99 @@ public class FrmPrimer extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jTree1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTree1MouseClicked
-        if(jTree1.getSelectionPath()==null)
+        if(jTree1.getSelectionPath()==null||jTree1.getSelectionPath().getLastPathComponent()==null)
             return;
-        putanja = jTree1.getSelectionPath().toString().replaceAll("[\\[\\]]", ", ").replace(", ", "\\");
-        String nazivFajla = jTree1.getSelectionPath().getLastPathComponent().toString();
-        jTextField1.setText(nazivFajla);
+        selectedNode = (TreeFileNode) jTree1.getSelectionPath().getLastPathComponent();
+        jTextFieldSelectedNode.setText(selectedNode.toString());
     }//GEN-LAST:event_jTree1MouseClicked
 
+    private void jButtonCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateActionPerformed
+        
+        if(selectedNode==null||selectedNode.getFile().isFile()){
+            JOptionPane.showMessageDialog(this, "Nije oznacen folder", "Greska", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if(jTextFieldNewNode.getText().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Novi fajl nema svoji naziv", "Greska", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        TreeFileNode selectedNode = (TreeFileNode)jTree1.getSelectionPath().getLastPathComponent();
+        String path = selectedNode.getFile().getPath().toString();
+        File newFile = new File(path,jTextFieldNewNode.getText()+"."+jComboBox1.getSelectedItem().toString());
+        try {
+            if(newFile.createNewFile()){
+                selectedNode.add(new TreeFileNode(newFile,new DefaultMutableTreeNode(newFile)));
+                JOptionPane.showMessageDialog(this, "Fajl je uspesno kreiran", "Uspesno", JOptionPane.INFORMATION_MESSAGE);
+                jTree1.updateUI();
+            }else{
+                JOptionPane.showMessageDialog(this, "Fajl vec postoji u sistemu", "Greska", JOptionPane.ERROR_MESSAGE);
+            }
+            
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Desila se greska prilikom kreiranja", "Greksa", JOptionPane.ERROR_MESSAGE);
+            Logger.getLogger(FrmPrimer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        jTree1.updateUI();
+    }//GEN-LAST:event_jButtonCreateActionPerformed
+
+    private void jButtonRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRenameActionPerformed
+        
+        if(selectedNode==null){
+            JOptionPane.showMessageDialog(this, "Nije oznacen fajl ili folder", "Greska", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if(jTextFieldSelectedNode.getText().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Novi naziv za fajl ne postoji", "Greska", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        TreeFileNode file = (TreeFileNode) jTree1.getSelectionPath().getLastPathComponent();
+        File newFile = new File(jTextFieldSelectedNode.getText());
+        file.getFile().renameTo(newFile);
+        TreeFileNode newNode = new TreeFileNode(newFile,new DefaultMutableTreeNode(newFile));
+        DefaultMutableTreeNode defaultNode = new DefaultMutableTreeNode(newFile);
+        file.setUserObject(newNode);
+        DefaultTreeModel model =(DefaultTreeModel)jTree1.getModel();
+        model.reload();
+        jTree1.updateUI();
+    }//GEN-LAST:event_jButtonRenameActionPerformed
+
     private void jButtonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenActionPerformed
-        if(putanja==null){
+        if(selectedNode==null||selectedNode.getFile().isDirectory()){
             JOptionPane.showMessageDialog(rootPane, "Nije selektovan ni jedan file");
             return;
         }
-        File selection = (File) jTree1.getSelectionPath().getLastPathComponent();
-        if(!selection.exists())
+        TreeFileNode selection = (TreeFileNode) jTree1.getSelectionPath().getLastPathComponent();
+        if(!selection.getFile().exists())
             JOptionPane.showMessageDialog(this, "Nije selektovan ni jedan fajl", "Greska", JOptionPane.ERROR_MESSAGE);
         if(!Desktop.isDesktopSupported())
             JOptionPane.showMessageDialog(this, "AWT desktop nije podrzan", "Greska", JOptionPane.ERROR_MESSAGE);
         try {
-            Desktop.getDesktop().open(selection);
+            Desktop.getDesktop().open(selection.getFile());
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "desila se nepredvidjena greska", "Greska", JOptionPane.ERROR_MESSAGE);
             Logger.getLogger(FrmPrimer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButtonOpenActionPerformed
 
-    private void jButtonCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateActionPerformed
-        if(putanja.isEmpty()){
-            JOptionPane.showMessageDialog(this, "Nije selektovan ni jedan direktorijum", "Greska", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if(jTextField2.getText().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Ne postoji novi naziv za fajl", "Greska", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        File parent = (File) jTree1.getSelectionPath().getLastPathComponent();
-        JTreeFileModel model =(JTreeFileModel)jTree1.getModel();
-        
-        try {
-            
-            model.createFile(parent, jTextField2.getText(),jComboBox1.getSelectedItem().toString());
-            jTree1.updateUI();
-        }
-        catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Desila se greska prilikom kreiranja", "Greska", JOptionPane.ERROR_MESSAGE);
-            Logger.getLogger(FrmPrimer.class.getName()).log(Level.SEVERE, null, ex);
-        }catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Nije selektovan direktorijum", putanja, HEIGHT);
-            Logger.getLogger(FrmPrimer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }//GEN-LAST:event_jButtonCreateActionPerformed
-
-    private void jButtonRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRenameActionPerformed
-        File selection = (File) jTree1.getSelectionPath().getLastPathComponent();
-        if(selection==null){
-            JOptionPane.showMessageDialog(this, "Nije odabran ni jedan fajl", "Greska", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        File novi = new File(selection.getParentFile().getPath()+File.separator+new File(jTextField1.getText()));
-        jTree1.updateUI();
-    }//GEN-LAST:event_jButtonRenameActionPerformed
-
     private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
-        File selection = (File) jTree1.getSelectionPath().getLastPathComponent();
-        if(selection==null){
-            JOptionPane.showMessageDialog(this, "Nije odabran ni jedan fajl", "Greska", JOptionPane.ERROR_MESSAGE);
-            return;
+        if(selectedNode==null){
+           JOptionPane.showMessageDialog(rootPane, "Nije selektovan ni jedan file");
+           return;
         }
-        selection.delete();
+        TreeFileNode file = (TreeFileNode) jTree1.getSelectionPath().getLastPathComponent();
+        TreeFileNode parent = (TreeFileNode) jTree1.getSelectionPath().getParentPath().getLastPathComponent();
+        file.getFile().delete();
+        parent.remove(file);
         jTree1.updateUI();
     }//GEN-LAST:event_jButtonDeleteActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+    private void jTextFieldSelectedNodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldSelectedNodeActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
+    }//GEN-LAST:event_jTextFieldSelectedNodeActionPerformed
+
+    private void jTextFieldNewNodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldNewNodeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldNewNodeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -294,12 +321,19 @@ public class FrmPrimer extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextFieldNewNode;
+    private javax.swing.JTextField jTextFieldSelectedNode;
     private javax.swing.JTree jTree1;
     // End of variables declaration//GEN-END:variables
 
-    private void podesiDrvo() {
-        jTree1.setModel(new JTreeFileModel(new File("primer")));
+    private void pripremiPodatke() {
+        File fileRoot = new File("primer");
+        root=new TreeFileNode(fileRoot,new DefaultMutableTreeNode(fileRoot));
+        
+        CreateChildNodes ccn = 
+                new CreateChildNodes(root);
+        new Thread(ccn).start();
+        treeModel = new DefaultTreeModel(root);
+        this.jTree1.setModel(treeModel);
     }
 }
