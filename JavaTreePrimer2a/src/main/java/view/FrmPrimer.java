@@ -61,11 +61,6 @@ public class FrmPrimer extends javax.swing.JFrame {
         jLabel2.setText("Naziv novog cvora");
 
         jTextFieldNewNode.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jTextFieldNewNode.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldNewNodeActionPerformed(evt);
-            }
-        });
 
         jButtonAdd.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jButtonAdd.setText("Dodaj");
@@ -168,10 +163,6 @@ public class FrmPrimer extends javax.swing.JFrame {
         parent.remove(selectedNode);
         jTree1.updateUI();
     }//GEN-LAST:event_jButtonDeleteActionPerformed
-
-    private void jTextFieldNewNodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldNewNodeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldNewNodeActionPerformed
 
     /**
      * @param args the command line arguments
